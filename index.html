@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Explorador Interactivo de Funciones</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header>
+      <div>
+        <h1>Explorador Interactivo de Funciones</h1>
+        <div class="small">Diseñado para estudiantes de grado octavo — visual, colorido y accesible.</div>
+      </div>
+      <div class="controls">
+        <div class="toggle card" style="padding:8px;">
+          <label for="modeSelect" class="sr-only">Modo</label>
+          <select id="modeSelect" aria-label="Seleccionar modo">
+            <option value="explore">Modo Exploración</option>
+            <option value="game">Modo Juego (Lineal)</option>
+          </select>
+        </div>
+        <button id="hcBtn" class="btn secondary" title="Alternar alto contraste">Alto Contraste</button>
+        <button id="lscBtn" class="btn" title="Instrucciones en LSC">Botón LSC</button>
+      </div>
+    </header>
+
+    <section class="explorer">
+      <div class="left card">
+        <div class="top-controls">
+          <div>
+            <label for="funcType">Selector de función</label>
+            <select id="funcType" aria-label="Seleccionar tipo de función">
+              <option value="linear">Lineal: y = m x + b</option>
+              <option value="quadratic">Cuadrática: y = m x² + b x + c</option>
+              <option value="cubic">Cúbica: y = m x³ + b x² + c x + d</option>
+              <option value="quartic">Polinómica: y = m x⁴ + b x³ + c x² + d x</option>
+              <option value="exponential">Exponencial: y = m · e^(b x) + c</option>
+              <option value="logarithmic">Logarítmica: y = m · log(b x) + c (x&gt;0)</option>
+            </select>
+          </div>
+          <div style="margin-left:auto"><strong id="graphTitle">y = a x + b</strong></div>
+        </div>
+
+        <div style="margin-top:6px">
+          <div class="sliders" id="sliders">
+            <div class="slider-row">
+              <label for="aRange">m: <span id="aVal" class="value">1.00</span></label>
+              <input id="aRange" type="range" min="-5" max="5" step="0.55" value="1">
+            </div>
+            <div class="slider-row">
+              <label for="bRange">b: <span id="bVal" class="value">0.00</span></label>
+              <input id="bRange" type="range" min="-5" max="5" step="0.55" value="0">
+            </div>
+            <div class="slider-row" id="cRow">
+              <label for="cRange">c: <span id="cVal" class="value">0.00</span></label>
+              <input id="cRange" type="range" min="-5" max="5" step="0.55" value="0">
+            </div>
+            <div class="slider-row" id="dRow">
+              <label for="dRange">d: <span id="dVal" class="value">0.00</span></label>
+              <input id="dRange" type="range" min="-5" max="5" step="0.55" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <button id="resetBtn" class="btn secondary">Restablecer parámetros</button>
+          <button id="randomBtn" class="btn">Aleatorizar</button>
+        </div>
+
+        <div style="margin-top:12px;font-size:0.95rem;color:var(--muted)">Sugerencia: mueve los deslizadores para ver cómo cambian las gráficas. Para logaritmos, el dominio es x&gt;0.</div>
+      </div>
+
+      <div class="card" style="padding:12px">
+        <canvas id="mainChart" width="720" height="420" role="img" aria-label="Gráfica de la función"></canvas>
+      </div>
+    </section>
+
+    <section class="game-area">
+      <div class="game-left card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div class="small">Modo Juego</div>
+            <h2 id="gameEquation">—</h2>
+          </div>
+          <div style="text-align:right">
+            <div class="timer pulse" id="countdown">45</div>
+            <div class="small">Tiempo restante</div>
+          </div>
+        </div>
+
+        <div class="options" id="options"></div>
+
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <button id="startGameBtn" class="btn">Iniciar Juego</button>
+          <button id="pauseGameBtn" class="btn secondary">Pausar</button>
+          <button id="restartGameBtn" class="btn secondary">Reiniciar</button>
+          <div class="small">Nivel: <span id="levelDisplay">1</span></div>
+          <div class="small">Puntaje: <strong id="scoreDisplay">0</strong></div>
+        </div>
+      </div>
+
+      <div class="game-right card" style="padding:12px">
+        <div style="font-weight:700;color:var(--accent2);font-size:1.1rem">Panel de ayuda</div>
+        <div class="small" style="margin-top:8px">Lee la ecuación y selecciona la gráfica que corresponde. A medida que subes de nivel, verás más opciones (distractores muy parecidos).</div>
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
+        <div><strong>Reglas de puntaje</strong></div>
+        <ul class="small">
+          <li>0-10 seg: 20 puntos</li>
+          <li>11-20 seg: 10 puntos</li>
+          <li>21-30 seg: 5 puntos</li>
+          <li>31-45 seg: 1 punto</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="small">Juego Matemático - (Mariana Álvarez - Carlos Mora - Mabel Agudelo - Juan Pablo Martínez)</footer>
+  </div>
+
+  <!-- Modal LSC -->
+  <div class="modal" id="lscModal" role="dialog" aria-modal="true">
+    <div class="panel">
+      <h3>Instrucciones en LSC por Carlos Mora</h3>
+      <div style="background:#eee;height:240px;display:flex;align-items:center;justify-content:center;border-radius:8px;margin-top:8px">
+        <div style="text-align:center;color:#333">Aquí se mostrará el video con las instrucciones en Lengua de Señas Colombiana (LSC). — Carlos Mora</div>
+      </div>
+      <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:8px">
+        <button id="closeLsc" class="btn secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal final de puntaje -->
+  <div class="modal" id="finalModal" role="dialog" aria-modal="true">
+    <div class="panel">
+      <h3>Juego finalizado</h3>
+      <div style="margin-top:8px;font-size:1.1rem">¡Has completado los 5 niveles!</div>
+      <div style="margin-top:12px;font-size:1.6rem;font-weight:800;color:var(--accent2)">Puntaje final: <span id="finalScore">0</span></div>
+      <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+        <button id="closeFinal" class="btn secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
