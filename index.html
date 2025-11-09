@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Explorador Interactivo de Funciones</title>
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -124,8 +123,18 @@
   <div class="modal" id="lscModal" role="dialog" aria-modal="true">
     <div class="panel">
       <h3>Instrucciones en LSC por Carlos Mora</h3>
-      <div style="background:#eee;height:240px;display:flex;align-items:center;justify-content:center;border-radius:8px;margin-top:8px">
-        <div style="text-align:center;color:#333">Aquí se mostrará el video con las instrucciones en Lengua de Señas Colombiana (LSC). — Carlos Mora</div>
+      <div style="background:#eee;border-radius:8px;margin-top:8px;padding:8px">
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:6px;background:#000">
+          <iframe id="lscVideo"
+            src="https://www.youtube-nocookie.com/embed/UEmCjJKw0xM"
+            title="Instrucciones en LSC: video de Carlos Mora"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            style="position:absolute;top:0;left:0;width:100%;height:100%;border:0">
+          </iframe>
+        </div>
+        <div style="margin-top:8px;font-size:0.95rem;color:#333">Link <a id="lscFallback" href="https://youtu.be/UEmCjJKw0xM" target="_blank" rel="noopener">YouTube (abrir en YouTube)</a>.</div>
       </div>
       <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:8px">
         <button id="closeLsc" class="btn secondary">Cerrar</button>
