@@ -112,7 +112,13 @@
       <div class="game-right card" style="padding:12px">
         <div style="font-weight:700;color:var(--accent2);font-size:1.1rem">Panel de ayuda</div>
         <div class="small" style="margin-top:8px">Lee la ecuación y selecciona la gráfica que corresponde. A medida que subes de nivel, verás más opciones (distractores muy parecidos).</div>
-          <div style="margin-top:8px" id="gameStatusContainer"><span class="small">Estado: </span><strong id="statusText" class="small">Esperando</strong></div>
+        <div style="margin-top:8px" id="gameStatusContainer"><span class="small">Estado: </span><strong id="statusText" class="small">Esperando</strong></div>
+        <div id="liveStats" style="margin-top:10px">
+          <div class="small" style="margin-top:6px">Aciertos: <strong id="liveCorrectCount">0</strong></div>
+          <div class="small" style="margin-top:4px">Errores: <strong id="liveIncorrectCount">0</strong></div>
+          <div class="small" style="margin-top:6px">Puntos ganados: <strong id="liveGoodPoints">0</strong></div>
+          <div class="small" style="margin-top:4px">Puntos perdidos: <strong id="liveBadPoints">0</strong></div>
+        </div>
         <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
         <div><strong>Reglas de puntaje</strong></div>
         <ul class="small">

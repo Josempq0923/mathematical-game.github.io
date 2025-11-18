@@ -385,6 +385,8 @@ function revealCorrect(chosenEl, timedOut=false, chosenCorrect=false){
     game.badPoints = (game.badPoints || 0) + points;
   }
   scoreDisplay.textContent = game.score;
+  // update live stats UI whenever counts change
+  updateLiveStatsUI();
 
   // proceed to next level after short delay; if level reaches 5, show final score and reset to idle
   setTimeout(()=>{
@@ -505,6 +507,8 @@ if(restartGameBtn){
       if(startGameBtn) startGameBtn.disabled = false;
       // update status indicator
       const statusText = document.getElementById('statusText'); if(statusText) statusText.textContent = 'Esperando';
+    // update live stats UI
+    updateLiveStatsUI();
   });
 }
 
@@ -517,6 +521,8 @@ closeFinal.addEventListener('click',()=>{
   if(startGameBtn) startGameBtn.disabled = false;
   // update status indicator
   const statusText = document.getElementById('statusText'); if(statusText) statusText.textContent = 'Esperando';
+  // update live stats UI
+  updateLiveStatsUI();
 });
 
 /*********************** Cronómetro sonoro y globos ************************/
@@ -570,6 +576,18 @@ funcType.value='linear'; syncStateFromUI();
 optionsEl.addEventListener('keydown',(e)=>{
   if(e.key==='Enter' && e.target.classList.contains('option')) e.target.click();
 });
+
+// Live stats UI update helper
+function updateLiveStatsUI(){
+  const lc = document.getElementById('liveCorrectCount');
+  const li = document.getElementById('liveIncorrectCount');
+  const lg = document.getElementById('liveGoodPoints');
+  const lb = document.getElementById('liveBadPoints');
+  if(lc) lc.textContent = (game.correctCount || 0);
+  if(li) li.textContent = (game.incorrectCount || 0);
+  if(lg) lg.textContent = (game.goodPoints || 0);
+  if(lb) lb.textContent = (game.badPoints || 0);
+}
 
 // small quality gate: update chart on load
 window.addEventListener('load',()=>{ updateChart(); });
