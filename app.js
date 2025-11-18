@@ -43,7 +43,7 @@ let state = {
 };
 
 // Game state
-let game = {running:false,level:1,score:0,target:null,options:[],timer:45,intervalId:null,optionCharts:[],paused:false};
+let game = {running:false,level:1,score:0,target:null,options:[],timer:45,intervalId:null,optionCharts:[],paused:false,correctCount:0,incorrectCount:0,goodPoints:0,badPoints:0};
 
 /*********************** Graficación ************************/
 function sampleXFor(type){
@@ -208,7 +208,11 @@ document.getElementById('randomBtn').addEventListener('click',()=>{
 /*********************** Modo Juego ************************/
 function startGame(){
   if(game.running) return;
-  game.running = true; game.level=1; game.score=0; levelDisplay.textContent = game.level; scoreDisplay.textContent=game.score;
+  game.running = true; game.level=1; game.score=0; game.correctCount=0; game.incorrectCount=0; game.goodPoints=0; game.badPoints=0; levelDisplay.textContent = game.level; scoreDisplay.textContent=game.score;
+  // update status indicator
+  const statusText = document.getElementById('statusText'); if(statusText) statusText.textContent = 'En curso';
+  // disable start button while a game is running
+  if(startGameBtn) startGameBtn.disabled = true;
   startRound();
 }
 
@@ -364,14 +368,21 @@ function revealCorrect(chosenEl, timedOut=false, chosenCorrect=false){
   else points = 1;
 
   if(timedOut){
-    // treat as wrong answer
+    // treat as wrong answer (timeout)
     game.score -= points;
+    game.incorrectCount = (game.incorrectCount || 0) + 1;
+    game.badPoints = (game.badPoints || 0) + points;
   } else if(chosenCorrect){
+    // correct answer
     game.score += points;
     showBalloons();
+    game.correctCount = (game.correctCount || 0) + 1;
+    game.goodPoints = (game.goodPoints || 0) + points;
   } else {
     // wrong answer chosen
     game.score -= points;
+    game.incorrectCount = (game.incorrectCount || 0) + 1;
+    game.badPoints = (game.badPoints || 0) + points;
   }
   scoreDisplay.textContent = game.score;
 
@@ -386,14 +397,81 @@ function revealCorrect(chosenEl, timedOut=false, chosenCorrect=false){
       game.running = false;
       // show final score
       finalScoreEl.textContent = game.score;
-      finalModal.style.display = 'flex';
+      // show counts and point breakdown
+      const fc = document.getElementById('finalCorrectCount');
+      const fi = document.getElementById('finalIncorrectCount');
+      const fg = document.getElementById('finalGoodPoints');
+      const fb = document.getElementById('finalBadPoints');
+  if(fc) fc.textContent = (game.correctCount || 0);
+  if(fi) fi.textContent = (game.incorrectCount || 0);
+  if(fg) fg.textContent = (game.goodPoints || 0);
+  if(fb) fb.textContent = (game.badPoints || 0);
+  // re-enable start button now that the game finished
+  if(startGameBtn) startGameBtn.disabled = false;
+  // update status indicator
+  const statusText = document.getElementById('statusText'); if(statusText) statusText.textContent = 'Esperando';
+  finalModal.style.display = 'flex';
       // after showing, reset internal state so the game requires pressing start again
       // preserve displayed final score until modal is closed
     }
   },1500);
 }
 
-startGameBtn.addEventListener('click',()=>{ startGame(); });
+// Interceptar inicio para mostrar modal de instrucciones cuando estemos en modo 'game'
+startGameBtn.addEventListener('click',()=>{
+  if(modeSelect && modeSelect.value === 'game'){
+    const gameInstructionsModal = document.getElementById('gameInstructionsModal');
+    const closeGameInstructions = document.getElementById('closeGameInstructions');
+    const cancelGameInstructions = document.getElementById('cancelGameInstructions');
+    if(gameInstructionsModal){
+      // show modal
+      gameInstructionsModal.style.display = 'flex';
+      // disable start button while modal is open
+      if(startGameBtn) startGameBtn.disabled = true;
+
+      // handler to start the game when user accepts
+      const onAccept = ()=>{
+        cleanup();
+        gameInstructionsModal.style.display = 'none';
+        setTimeout(()=>{ if(!game.running) startGame(); }, 50);
+      };
+
+      // handler to cancel (close modal without starting)
+      const onCancel = ()=>{
+        cleanup();
+        gameInstructionsModal.style.display = 'none';
+        if(startGameBtn) startGameBtn.disabled = false;
+      };
+
+      // clicking on backdrop should cancel (not start)
+      const onBackdrop = (e)=>{ if(e.target === gameInstructionsModal){ onCancel(); } };
+
+      // Escape key cancels
+      const onKey = (e)=>{ if(e.key === 'Escape'){ onCancel(); } };
+
+      function cleanup(){
+        if(closeGameInstructions) closeGameInstructions.removeEventListener('click', onAccept);
+        if(cancelGameInstructions) cancelGameInstructions.removeEventListener('click', onCancel);
+        gameInstructionsModal.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onKey);
+      }
+
+      if(closeGameInstructions){
+        closeGameInstructions.addEventListener('click', onAccept);
+      }
+      if(cancelGameInstructions){
+        cancelGameInstructions.addEventListener('click', onCancel);
+      }
+      gameInstructionsModal.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onKey);
+    } else {
+      // fallback
+      startGame();
+    }
+  } else {
+    startGame();
+  }
+});
 
 // Pause / Resume
 if(pauseGameBtn){
@@ -417,20 +495,28 @@ if(pauseGameBtn){
 if(restartGameBtn){
   restartGameBtn.addEventListener('click',()=>{
     if(game.intervalId) clearInterval(game.intervalId);
-    game.running = false; game.paused = false;
-    game.level = 1; game.score = 0; game.target = null; game.options = [];
+      game.running = false; game.paused = false;
+      game.level = 1; game.score = 0; game.correctCount = 0; game.incorrectCount = 0; game.goodPoints = 0; game.badPoints = 0; game.target = null; game.options = [];
     optionsEl.innerHTML = '';
     levelDisplay.textContent = game.level; scoreDisplay.textContent = game.score;
     game.timer = 45; countdownEl.textContent = game.timer;
     updatePauseButton();
+      // ensure start button is enabled after restart
+      if(startGameBtn) startGameBtn.disabled = false;
+      // update status indicator
+      const statusText = document.getElementById('statusText'); if(statusText) statusText.textContent = 'Esperando';
   });
 }
 
 closeFinal.addEventListener('click',()=>{
   finalModal.style.display = 'none';
   // reset game to initial state, require user to press start
-  game.level = 1; game.score = 0; levelDisplay.textContent = game.level; scoreDisplay.textContent = game.score; game.target = null; game.options = [];
+  game.level = 1; game.score = 0; game.correctCount = 0; game.incorrectCount = 0; game.goodPoints = 0; game.badPoints = 0; levelDisplay.textContent = game.level; scoreDisplay.textContent = game.score; game.target = null; game.options = [];
   optionsEl.innerHTML = '';
+  // enable start button after closing final modal
+  if(startGameBtn) startGameBtn.disabled = false;
+  // update status indicator
+  const statusText = document.getElementById('statusText'); if(statusText) statusText.textContent = 'Esperando';
 });
 
 /*********************** Cronómetro sonoro y globos ************************/
